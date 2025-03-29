@@ -1,0 +1,13 @@
+pub static ERROR_NOT_ACTIVE: &[u8] = b"contract not active";
+pub static ERROR_NO_PAYMENTS: &[u8] = b"no payments";
+pub static ERROR_WRONG_BIDS: &[u8] = b"wrong bids";
+pub static ERROR_ONLY_NFT: &[u8] = b"only nfts are allowed";
+pub static ERROR_WRONG_TIMES: &[u8] = b"wrong start and/or end time(s)";
+pub static ERROR_LISTING_NOT_FOUND: &[u8] = b"listing not found";
+pub static ERROR_BID_NOT_FOUND: &[u8] = b"bid not found";
+pub static ERROR_ONLY_LISTING_OWNER: &[u8] = b"only listing owner can call this function";
+pub static ERROR_ONLY_BUYER: &[u8] = b"only original buyer can call this function";
+pub static ERROR_WRONG_PAYMENT: &[u8] = b"wrong payment";
+pub static ERROR_LISTING_EXPIRED: &[u8] = b"listing expired";
+pub static ERROR_LISTING_NOT_STARTED: &[u8] = b"listing not yet active";
+pub static ERROR_LISTING_NOT_ENDED: &[u8] = b"listing not yet ended";
