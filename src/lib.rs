@@ -12,14 +12,17 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
     common::config::ConfigModule
 {
     #[init]
-    fn init(&self, platform_sc: ManagedAddress) {
-        self.platform_sc().set(platform_sc);
-        let governance_token = self.platform_contract_proxy()
-            .contract(self.platform_sc().get())
-            .governance_token()
-            .execute_on_dest_context::<TokenIdentifier>();
-        self.governance_token().set(governance_token);
-        self.set_state_active();
+    fn init(&self) {
+        let caller = self.blockchain().get_caller();
+        if self.blockchain().is_smart_contract(&caller) {
+            self.platform_sc().set(&caller);
+            let governance_token = self.platform_contract_proxy()
+                .contract(caller)
+                .governance_token()
+                .execute_on_dest_context::<TokenIdentifier>();
+            self.governance_token().set(governance_token);
+            self.set_state_active();
+        }
     }
 
     #[upgrade]
@@ -242,8 +245,4 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
             .check_whitelisted(address)
             .execute_on_dest_context::<()>();
     }
-
-    // proxies
-    #[proxy]
-    fn platform_contract_proxy(&self) -> tfn_platform::Proxy<Self::Api>;
 }

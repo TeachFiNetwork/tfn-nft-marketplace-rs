@@ -1,6 +1,9 @@
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
+use tfn_platform::common::errors::*;
+use tfn_platform::common::config::ProxyTrait as _;
+
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
 pub enum State {
@@ -67,6 +70,8 @@ pub trait ConfigModule {
     #[only_owner]
     #[endpoint(setStateActive)]
     fn set_state_active(&self) {
+        require!(!self.platform_sc().is_empty(), ERROR_PLATFORM_NOT_SET);
+
         self.state().set(State::Active);
     }
 
@@ -84,6 +89,19 @@ pub trait ConfigModule {
     #[view(getPlatformAddress)]
     #[storage_mapper("platform_address")]
     fn platform_sc(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[only_owner]
+    #[endpoint(setPlatformAddress)]
+    fn set_platform_address(&self, platform_sc: ManagedAddress) {
+        require!(self.platform_sc().is_empty(), ERROR_PLATFORM_ALREADY_SET);
+
+        self.platform_sc().set(&platform_sc);
+        let governance_token = self.platform_contract_proxy()
+            .contract(platform_sc)
+            .governance_token()
+            .execute_on_dest_context::<TokenIdentifier>();
+        self.governance_token().set(governance_token);
+    }
 
     // governance token
     #[view(getGovernanceToken)]
@@ -132,4 +150,8 @@ pub trait ConfigModule {
 
         bids
     }
+
+    // proxies
+    #[proxy]
+    fn platform_contract_proxy(&self) -> tfn_platform::Proxy<Self::Api>;
 }
