@@ -40,9 +40,11 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
         start_time: u64,
         end_time: u64,
     ) {
+        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
+
         let caller = self.blockchain().get_caller();
         self.check_whitelisted(&caller);
-        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
+
         let current_time = self.blockchain().get_block_timestamp();
         if listing_type == ListingType::Auction {
             require!(min_bid <= buyout_price, ERROR_WRONG_BIDS);
@@ -125,9 +127,10 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
     #[payable("*")]
     #[endpoint(buy)]
     fn buy(&self, listing_id: u64) {
+        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
+
         let governance_token = self.governance_token().get();
         let payment = self.call_value().single_esdt();
-        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
         require!(payment.token_identifier == governance_token, ERROR_WRONG_PAYMENT);
         require!(!self.listings(listing_id).is_empty(), ERROR_LISTING_NOT_FOUND);
 
@@ -162,8 +165,9 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
     #[payable("*")]
     #[endpoint(addBid)]
     fn add_bid(&self, listing_id: u64) {
-        let payment = self.call_value().single_esdt();
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
+
+        let payment = self.call_value().single_esdt();
         require!(payment.token_identifier == self.governance_token().get(), ERROR_WRONG_PAYMENT);
         require!(!self.listings(listing_id).is_empty(), ERROR_LISTING_NOT_FOUND);
 
