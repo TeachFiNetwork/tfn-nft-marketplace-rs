@@ -91,7 +91,7 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
 
         let listing = self.listings(listing_id).get();
         let caller = self.blockchain().get_caller();
-        require!(listing.seller == caller, ERROR_ONLY_LISTING_OWNER);
+        require!(caller == listing.seller || caller == self.blockchain().get_owner_address(), ERROR_ONLY_LISTING_OWNER);
 
         self.send().direct_esdt(
             &caller,
