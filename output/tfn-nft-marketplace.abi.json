@@ -1,0 +1,398 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.85.0",
+            "commitHash": "4d91de4e48198da2e33413efdcd9cd2cc0c46688",
+            "commitDate": "2025-02-17",
+            "channel": "Stable",
+            "short": "rustc 1.85.0 (4d91de4e4 2025-02-17)"
+        },
+        "contractCrate": {
+            "name": "tfn-nft-marketplace",
+            "version": "0.0.1"
+        },
+        "framework": {
+            "name": "multiversx-sc",
+            "version": "0.54.5"
+        }
+    },
+    "name": "TFNNFTMarketplaceContract",
+    "constructor": {
+        "inputs": [],
+        "outputs": []
+    },
+    "upgradeConstructor": {
+        "inputs": [],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "addListing",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "listing_type",
+                    "type": "ListingType"
+                },
+                {
+                    "name": "price",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "min_bid",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "buyout_price",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "start_time",
+                    "type": "u64"
+                },
+                {
+                    "name": "end_time",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "removeListing",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "listing_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "buy",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "listing_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "addBid",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "listing_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "removeBid",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "bid_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "acceptBid",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "bid_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setStateActive",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "setStateInactive",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "getState",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "State"
+                }
+            ]
+        },
+        {
+            "name": "getPlatformAddress",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "setPlatformAddress",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "platform_sc",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getGovernanceToken",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "TokenIdentifier"
+                }
+            ]
+        },
+        {
+            "name": "getLastListingId",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getListings",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "listing_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "Listing"
+                }
+            ]
+        },
+        {
+            "name": "getSellerListings",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "seller",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<u64>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getLastBidId",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getBid",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "bid_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "Bid"
+                }
+            ]
+        },
+        {
+            "name": "getListingBids",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "listing_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<u64>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getBuyerBids",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "bidder",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<u64>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getBuyerBidsByListingId",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "buyer",
+                    "type": "Address"
+                },
+                {
+                    "name": "listing_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<Bid>"
+                }
+            ]
+        }
+    ],
+    "esdtAttributes": [],
+    "hasCallback": false,
+    "types": {
+        "Bid": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "u64"
+                },
+                {
+                    "name": "listing_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "bidder",
+                    "type": "Address"
+                },
+                {
+                    "name": "offer",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        "Listing": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "u64"
+                },
+                {
+                    "name": "seller",
+                    "type": "Address"
+                },
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "token_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "token_amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "listing_type",
+                    "type": "ListingType"
+                },
+                {
+                    "name": "price",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "min_bid",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "buyout_price",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "start_time",
+                    "type": "u64"
+                },
+                {
+                    "name": "end_time",
+                    "type": "u64"
+                }
+            ]
+        },
+        "ListingType": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "FixedPrice",
+                    "discriminant": 0
+                },
+                {
+                    "name": "Auction",
+                    "discriminant": 1
+                }
+            ]
+        },
+        "State": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "Inactive",
+                    "discriminant": 0
+                },
+                {
+                    "name": "Active",
+                    "discriminant": 1
+                }
+            ]
+        }
+    }
+}
