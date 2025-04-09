@@ -7,7 +7,10 @@
 
 # Description
 
-This is a child contract of Platform SC. A separate instance is deployed for each platform subscriber.
+This is a child contract of Platform SC. A separate instance is deployed for each platform subscriber.\
+Empowers students to monetize their artistic skills. Users whitelisted in the parent Platform SC can list their creations (NFTs). There are two types of listings: fixed price and auction. 
+Buyers can immediately buy fixed priced NFTs or even auctioned NFTs if they pay the "buy out" price, or they can place bids (offers). Sellers may accept or not the highest bid.\
+Listings may also have start and end times, in order to create FOMO among the community.
 <br/>
 <br/>
 <br/>
