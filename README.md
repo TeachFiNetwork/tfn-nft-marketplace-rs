@@ -143,6 +143,12 @@ getListing(listing_id: u64) -> Listing
 <br/>
 
 ```rust
+getListings(seller: OptionalValue<ManagedAddress>) -> ManagedVec<Listing>
+```
+>If `seller` is specified, it returns his listings, otherwise it returns all the listings.
+<br/>
+
+```rust
 getLastListingId() -> u64
 ```
 >Returns `ID - 1` of the last added Listing object.
@@ -170,6 +176,18 @@ getListingLastBid(listing_id: u64) -> (BigUint, Option<Bid>)
 getBuyerBidByListingId(buyer: &ManagedAddress, listing_id: u64) -> Option<Bid>
 ```
 >If the specified `buyer` has placed a bid for `listing_id`, it returns Some(Bid) and None otherwise.
+<br/>
+
+```rust
+getListingBids(listing_id: u64) -> ManagedVec<Bid>
+```
+>Returns all the bids of `listing_id`.
+<br/>
+
+```rust
+getBuyerBids(buyer: &ManagedAddress) -> ManagedVec<Bid>
+```
+>Returns all the bids placed by `buyer`.
 
 <br/>
 
