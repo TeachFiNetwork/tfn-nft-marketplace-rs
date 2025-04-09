@@ -80,6 +80,36 @@ acceptBid(listing_id: u64)
 
 >[!NOTE]
 >Accepts the highest bid and removes the listing.
+<br/>
+
+```rust
+setStateActive()
+```
+>[!IMPORTANT]
+*Requirements:* the caller must be the SC owner.
+
+>[!NOTE]
+>Sets the SC state as active.
+<br/>
+
+```rust
+setStateInactive()
+```
+>[!IMPORTANT]
+*Requirements:* the caller must be the SC owner.
+
+>[!NOTE]
+>Sets the SC state as inactive.
+<br/>
+
+```rust
+setPlatformAddress(platform_sc: ManagedAddress)
+```
+>[!IMPORTANT]
+>*Requirements:* caller = owner, platform should be empty.
+
+>[!NOTE]
+>Sets the Platform SC address and retrieves the governance token id from it.
 
 <br/>
 
@@ -91,6 +121,54 @@ acceptBid(listing_id: u64)
 getState() -> State
 ```
 >Returns the state of the SC (Active or Inactive).
+<br/>
+
+```rust
+getPlatformAddress() -> ManagedAddress
+```
+>Returns the Platform SC address if set.
+<br/>
+
+```rust
+getGovernanceToken() -> TokenIdentifier
+```
+>Returns the DAO's governance token id (only if the Platform SC is set).
+<br/>
+
+```rust
+getListing(listing_id: u64) -> Listing
+```
+>Returns the Listing object associated with the `listing_id` parameter.
+<br/>
+
+```rust
+getLastListingId() -> u64
+```
+>Returns `ID - 1` of the last added Listing object.
+<br/>
+
+```rust
+getBid(bid_id: u64) -> Bid
+```
+>Returns the Bid object associated with the `bid_id` parameter.
+<br/>
+
+```rust
+getLastBidId() -> u64
+```
+>Returns `ID - 1` of the last added Bid object.
+<br/>
+
+```rust
+getListingLastBid(listing_id: u64) -> (BigUint, Option<Bid>)
+```
+>If the listing does not exist or the type is not Auction, the SC panics. Otherwise, it returns the highest bidded amount and Some(Bid). If no bids are placed, it returns (min_bid - 1, None).
+<br/>
+
+```rust
+getBuyerBidByListingId(buyer: ManagedAddress, listing_id: u64) -> Option<Bid>
+```
+>If the specified `buyer` has placed a bid for `listing_id`, it returns Some(Bid) and None otherwise.
 
 <br/>
 
