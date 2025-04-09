@@ -4,6 +4,8 @@ multiversx_sc::derive_imports!();
 use tfn_platform::common::errors::*;
 use tfn_platform::common::config::ProxyTrait as _;
 
+use crate::common::errors::*;
+
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
 pub enum State {
@@ -113,7 +115,7 @@ pub trait ConfigModule {
     #[storage_mapper("last_listing_id")]
     fn last_listing_id(&self) -> SingleValueMapper<u64>;
 
-    #[view(getListings)]
+    #[view(getListing)]
     #[storage_mapper("listings")]
     fn listings(&self, listing_id: u64) -> SingleValueMapper<Listing<Self::Api>>;
 
@@ -130,25 +132,46 @@ pub trait ConfigModule {
     #[storage_mapper("bids")]
     fn bids(&self, bid_id: u64) -> SingleValueMapper<Bid<Self::Api>>;
 
-    #[view(getListingBids)]
     #[storage_mapper("listing_bids")]
     fn listing_bids(&self, listing_id: u64) -> UnorderedSetMapper<u64>;
 
-    #[view(getBuyerBids)]
     #[storage_mapper("buyer_bids")]
-    fn buyer_bids(&self, bidder: ManagedAddress) -> UnorderedSetMapper<u64>;
+    fn buyer_bids(&self, bidder: &ManagedAddress) -> UnorderedSetMapper<u64>;
 
-    #[view(getBuyerBidsByListingId)]
-    fn get_buyer_bids_by_listing_id(&self, buyer: ManagedAddress, listing_id: u64) -> ManagedVec<Bid<Self::Api>> {
-        let mut bids = ManagedVec::new();
+    #[view(getBuyerBidByListingId)]
+    fn get_buyer_bid_by_listing_id(&self, buyer: &ManagedAddress, listing_id: u64) -> Option<Bid<Self::Api>> {
         for bid_id in self.buyer_bids(buyer).iter() {
             let bid = self.bids(bid_id).get();
             if bid.listing_id == listing_id {
-                bids.push(bid);
+                return Some(bid)
             }
         }
 
-        bids
+        None
+    }
+
+    #[view(getListingLastBid)]
+    fn get_listing_last_bid(&self, listing_id: u64) -> (BigUint, Option<Bid<Self::Api>>) {
+        if self.listings(listing_id).is_empty() {
+            sc_panic!(ERROR_LISTING_NOT_FOUND);
+        }
+
+        let listing = self.listings(listing_id).get();
+        if listing.listing_type != ListingType::Auction {
+            sc_panic!(ERROR_NOT_AUCTION);
+        }
+
+        let mut highest_bid_amount = listing.min_bid - 1u64;
+        let mut highest_bid = None;
+        for bid_id in self.listing_bids(listing_id).iter() {
+            let bid = self.bids(bid_id).get();
+            if bid.offer > highest_bid_amount {
+                highest_bid_amount = bid.offer.clone();
+                highest_bid = Some(bid);
+            }
+        }
+
+        (highest_bid_amount, highest_bid)
     }
 
     // proxies

@@ -58,7 +58,11 @@
                     "type": "u64"
                 }
             ],
-            "outputs": []
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
         },
         {
             "name": "removeListing",
@@ -115,7 +119,7 @@
             "mutability": "mutable",
             "inputs": [
                 {
-                    "name": "bid_id",
+                    "name": "listing_id",
                     "type": "u64"
                 }
             ],
@@ -188,7 +192,7 @@
             ]
         },
         {
-            "name": "getListings",
+            "name": "getListing",
             "mutability": "readonly",
             "inputs": [
                 {
@@ -244,39 +248,7 @@
             ]
         },
         {
-            "name": "getListingBids",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "listing_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "variadic<u64>",
-                    "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "getBuyerBids",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "bidder",
-                    "type": "Address"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "variadic<u64>",
-                    "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "getBuyerBidsByListingId",
+            "name": "getBuyerBidByListingId",
             "mutability": "readonly",
             "inputs": [
                 {
@@ -290,7 +262,22 @@
             ],
             "outputs": [
                 {
-                    "type": "List<Bid>"
+                    "type": "Option<Bid>"
+                }
+            ]
+        },
+        {
+            "name": "getListingLastBid",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "listing_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "tuple<BigUint,Option<Bid>>"
                 }
             ]
         }

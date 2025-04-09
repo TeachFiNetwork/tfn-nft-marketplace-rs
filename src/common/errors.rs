@@ -11,3 +11,5 @@ pub static ERROR_WRONG_PAYMENT: &[u8] = b"wrong payment";
 pub static ERROR_LISTING_EXPIRED: &[u8] = b"listing expired";
 pub static ERROR_LISTING_NOT_STARTED: &[u8] = b"listing not yet active";
 pub static ERROR_LISTING_NOT_ENDED: &[u8] = b"listing not yet ended";
+pub static ERROR_NOT_AUCTION: &[u8] = b"not an auction listing";
+pub static ERROR_BID_TOO_LOW: &[u8] = b"bid too low";

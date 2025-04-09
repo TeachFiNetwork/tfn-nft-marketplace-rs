@@ -39,7 +39,7 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
         buyout_price: BigUint,
         start_time: u64,
         end_time: u64,
-    ) {
+    ) -> u64 {
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
 
         let caller = self.blockchain().get_caller();
@@ -48,6 +48,7 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
         let current_time = self.blockchain().get_block_timestamp();
         if listing_type == ListingType::Auction {
             require!(min_bid <= buyout_price, ERROR_WRONG_BIDS);
+            require!(min_bid > 0, ERROR_WRONG_BIDS);
         };
         if start_time > 0 {
             require!(start_time > current_time, ERROR_WRONG_TIMES);
@@ -84,6 +85,8 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
             id += 1;
         }
         self.last_listing_id().set(id);
+
+        id
     }
 
     #[endpoint(removeListing)]
@@ -101,10 +104,10 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
             listing.token_nonce,
             &listing.token_amount,
         );
-        self.do_remove_listing(listing);
+        self.do_remove_listing(&listing);
     }
 
-    fn do_remove_listing(&self, listing: Listing<Self::Api>) {
+    fn do_remove_listing(&self, listing: &Listing<Self::Api>) {
         if listing.listing_type == ListingType::Auction {
             let governance_token = self.governance_token().get();
             for bid_id in self.listing_bids(listing.id).iter() {
@@ -115,13 +118,13 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
                     0,
                     &bid.offer,
                 );
-                self.buyer_bids(bid.bidder).swap_remove(&bid.id);
+                self.buyer_bids(&bid.bidder).swap_remove(&bid.id);
                 self.bids(bid.id).clear();
             }
             self.listing_bids(listing.id).clear();
         }
         self.listings(listing.id).clear();
-        self.seller_listings(listing.seller).swap_remove(&listing.id);
+        self.seller_listings(listing.seller.clone()).swap_remove(&listing.id);
     }
 
     #[payable("*")]
@@ -146,6 +149,11 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
         };
         require!(&payment.amount == expected_price, ERROR_WRONG_PAYMENT);
 
+        self.do_buy(&listing, payment.amount);
+    }
+
+    fn do_buy(&self, listing: &Listing<Self::Api>, price: BigUint) {
+        let governance_token = self.governance_token().get();
         let caller = self.blockchain().get_caller();
         self.send().direct_esdt(
             &caller,
@@ -157,7 +165,7 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
             &listing.seller,
             &governance_token,
             0,
-            &payment.amount,
+            &price,
         );
         self.do_remove_listing(listing);
     }
@@ -173,12 +181,34 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
 
         let listing = self.listings(listing_id).get();
         let current_time = self.blockchain().get_block_timestamp();
+        require!(listing.listing_type == ListingType::Auction, ERROR_NOT_AUCTION);
         require!(!listing.has_expired(current_time), ERROR_LISTING_EXPIRED);
         require!(listing.has_started(current_time), ERROR_LISTING_NOT_STARTED);
 
-        require!(payment.amount >= listing.min_bid, ERROR_WRONG_BIDS);
+        let (highest_bid_amount, _) = self.get_listing_last_bid(listing_id);
+        require!(payment.amount > highest_bid_amount, ERROR_BID_TOO_LOW);
 
         let caller = self.blockchain().get_caller();
+        let current_bid = self.get_buyer_bid_by_listing_id(&caller, listing_id);
+        if current_bid.is_some() {
+            self.remove_bid(current_bid.unwrap().id);
+        }
+
+        if payment.amount >= listing.buyout_price {
+            let diff = &payment.amount - &listing.buyout_price;
+            if diff > 0 {
+                self.send().direct_esdt(
+                    &caller,
+                    &payment.token_identifier,
+                    0,
+                    &diff,
+                );
+            }
+            self.do_buy(&listing, listing.buyout_price.clone());
+
+            return
+        }
+
         let bid_id = self.last_bid_id().get();
         let bid = Bid {
             id: bid_id,
@@ -187,7 +217,7 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
             offer: payment.amount,
         };
         self.bids(bid_id).set(bid);
-        self.buyer_bids(caller).insert(bid_id);
+        self.buyer_bids(&caller).insert(bid_id);
         self.listing_bids(listing_id).insert(bid_id);
         self.last_bid_id().set(bid_id + 1);
     }
@@ -202,7 +232,7 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
         require!(bid.bidder == caller, ERROR_ONLY_BUYER);
 
         self.listing_bids(bid.listing_id).swap_remove(&bid.id);
-        self.buyer_bids(caller.clone()).swap_remove(&bid.id);
+        self.buyer_bids(&caller).swap_remove(&bid.id);
         self.bids(bid.id).clear();
         self.send().direct_esdt(
             &caller,
@@ -213,12 +243,11 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
     }
 
     #[endpoint(acceptBid)]
-    fn accept_bid(&self, bid_id: u64) {
+    fn accept_bid(&self, listing_id: u64) {
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
-        require!(!self.bids(bid_id).is_empty(), ERROR_BID_NOT_FOUND);
+        require!(!self.listings(listing_id).is_empty(), ERROR_LISTING_NOT_FOUND);
 
-        let bid = self.bids(bid_id).get();
-        let listing = self.listings(bid.listing_id).get();
+        let listing = self.listings(listing_id).get();
         require!(listing.listing_type == ListingType::Auction, ERROR_WRONG_BIDS);
 
         let current_time = self.blockchain().get_block_timestamp();
@@ -227,8 +256,11 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
         let caller = self.blockchain().get_caller();
         require!(listing.seller == caller, ERROR_ONLY_LISTING_OWNER);
 
+        let (highest_bid_amount, highest_bid) = self.get_listing_last_bid(listing_id);
+        require!(highest_bid.is_some(), ERROR_BID_NOT_FOUND);
+
         self.send().direct_esdt(
-            &bid.bidder,
+            &highest_bid.unwrap().bidder,
             &listing.token_id,
             listing.token_nonce,
             &listing.token_amount,
@@ -237,9 +269,9 @@ pub trait TFNNFTMarketplaceContract<ContractReader>:
             &caller,
             &self.governance_token().get(),
             0,
-            &bid.offer,
+            &highest_bid_amount,
         );
-        self.do_remove_listing(listing);
+        self.do_remove_listing(&listing);
     }
 
     // helpers
