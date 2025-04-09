@@ -59,7 +59,8 @@ addBid(listing_id: u64)
 >*Requirements:* state = active, listing type must be Auction, payment must be in DAO's governance tokens and amount > last bid.
 
 >[!NOTE]
->Places a bid for the specified `listing_id`. If payment.amount >= buyout_price, the NFT is bought automatically and the difference in tokens is sent back to the caller.
+>Places a bid for the specified `listing_id`. If the bidder already has a bid on `listing_id`, the old bid is removed. 
+>If payment.amount >= buyout_price, the NFT is bought automatically and the difference in tokens is sent back to the caller.
 <br/>
 
 ```rust
@@ -166,7 +167,7 @@ getListingLastBid(listing_id: u64) -> (BigUint, Option<Bid>)
 <br/>
 
 ```rust
-getBuyerBidByListingId(buyer: ManagedAddress, listing_id: u64) -> Option<Bid>
+getBuyerBidByListingId(buyer: &ManagedAddress, listing_id: u64) -> Option<Bid>
 ```
 >If the specified `buyer` has placed a bid for `listing_id`, it returns Some(Bid) and None otherwise.
 
