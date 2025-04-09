@@ -248,6 +248,52 @@
             ]
         },
         {
+            "name": "getLstings",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "seller",
+                    "type": "optional<Address>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<Listing>"
+                }
+            ]
+        },
+        {
+            "name": "getListingBids",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "listing_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<Bid>"
+                }
+            ]
+        },
+        {
+            "name": "getBuyerBids",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "buyer",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<Bid>"
+                }
+            ]
+        },
+        {
             "name": "getBuyerBidByListingId",
             "mutability": "readonly",
             "inputs": [

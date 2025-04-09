@@ -138,6 +138,49 @@ pub trait ConfigModule {
     #[storage_mapper("buyer_bids")]
     fn buyer_bids(&self, bidder: &ManagedAddress) -> UnorderedSetMapper<u64>;
 
+    #[view(getLstings)]
+    fn get_listings(&self, seller: OptionalValue<ManagedAddress>) -> ManagedVec<Listing<Self::Api>> {
+        let mut listings = ManagedVec::new();
+        let (all, seller) = match seller {
+            OptionalValue::Some(seller) => (false, seller),
+            OptionalValue::None => (true, ManagedAddress::zero()),
+        };
+        for listing_id in 0..self.last_listing_id().get() {
+            if self.listings(listing_id).is_empty() {
+                continue;
+            }
+
+            let listing = self.listings(listing_id).get();
+            if all || listing.seller == seller {
+                listings.push(listing);
+            }
+        }
+
+        listings
+    }
+
+    #[view(getListingBids)]
+    fn get_listing_bids(&self, listing_id: u64) -> ManagedVec<Bid<Self::Api>> {
+        let mut bids = ManagedVec::new();
+        for bid_id in self.listing_bids(listing_id).iter() {
+            let bid = self.bids(bid_id).get();
+            bids.push(bid);
+        }
+
+        bids
+    }
+
+    #[view(getBuyerBids)]
+    fn get_buyer_bids(&self, buyer: &ManagedAddress) -> ManagedVec<Bid<Self::Api>> {
+        let mut bids = ManagedVec::new();
+        for bid_id in self.buyer_bids(buyer).iter() {
+            let bid = self.bids(bid_id).get();
+            bids.push(bid);
+        }
+
+        bids
+    }
+
     #[view(getBuyerBidByListingId)]
     fn get_buyer_bid_by_listing_id(&self, buyer: &ManagedAddress, listing_id: u64) -> Option<Bid<Self::Api>> {
         for bid_id in self.buyer_bids(buyer).iter() {
