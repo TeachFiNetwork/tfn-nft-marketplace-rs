@@ -50,7 +50,7 @@ where
 
     pub fn has_started(&self, current_time: u64) -> bool {
         if self.start_time > 0 {
-            self.start_time >= current_time
+            self.start_time <= current_time
         } else {
             true
         }
